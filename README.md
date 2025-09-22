@@ -8,7 +8,7 @@
   [![React Native](https://img.shields.io/badge/React%20Native-0.79.1-blue.svg)](https://reactnative.dev/)
   [![Expo](https://img.shields.io/badge/Expo-53.0.0-black.svg)](https://expo.dev/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue.svg)](https://www.typescriptlang.org/)
-  [![iOS](https://img.shields.io/badge/iOS-13.0+-lightgrey.svg)](https://developer.apple.com/ios/)
+  [![iOS](https://img.shields.io/badge/iOS-26.0+-lightgrey.svg)](https://developer.apple.com/ios/)
   [![Android](https://img.shields.io/badge/Android-6.0+-green.svg)](https://developer.android.com/)
   [![Web](https://img.shields.io/badge/Web-Compatible-orange.svg)](https://expo.dev/web)
 </div>
@@ -16,6 +16,7 @@
 ## Table des Matières
 *   [À propos du Projet](#à-propos-du-projet)
 *   [Fonctionnalités](#fonctionnalités)
+*   [Design Glassmorphique](#design-glassmorphique)
 *   [Technologies Utilisées](#technologies-utilisées)
 *   [Architecture](#architecture)
 *   [Installation](#installation)
@@ -68,12 +69,21 @@
 ### 🌐 Fonctionnalités Sociales
 *   **Intégration Réseaux Sociaux :** Liens vers Facebook, YouTube, X (Twitter)
 *   **Partage Facile :** Bouton d'action flottant avec animations
-*   **Site Web Officiel :** Accès direct au site 1min4peace.org
 
 ### ⚙️ Configuration et Personnalisation
 *   **Sélection de Langue :** Interface multilingue (FR, EN, IT, JP, ES, DE)
 *   **Réglages Système :** Notifications, préférences utilisateur
 *   **Thème Adaptatif :** Interface qui s'adapte aux préférences système
+
+## Design Glassmorphique
+
+MinderLink intègre un design glassmorphique moderne, offrant une interface utilisateur élégante et immersive. Cette approche visuelle est appliquée de manière cohérente à travers l'application, en respectant scrupuleusement la palette de couleurs existante pour une harmonie visuelle parfaite.
+
+*   **Effets de Flou et Transparence**: Les éléments clés de l'interface, tels que les cartes de réunion, les en-têtes et les boutons, bénéficient d'un arrière-plan flou grâce à `expo-blur`. Des couches translucides, créées avec `expo-linear-gradient`, permettent de révéler subtilement le fond tout en assurant la lisibilité du contenu.
+*   **Palette de Couleurs Préservée**: Le glassmorphisme est intégré en ajustant les opacités et les saturations des couleurs existantes (turquoise, orange, vert, blanc) pour créer des effets de profondeur sans introduire de nouvelles teintes. Cela garantit une cohérence visuelle forte avec l'identité de MinderLink.
+*   **Reflets et Bordures Subtils**: Des dégradés très légers simulent des reflets de lumière sur les surfaces glassmorphiques, ajoutant une touche de réalisme et de sophistication. Des bordures fines et semi-transparentes définissent les contours des éléments, renforçant l'effet de "verre dépoli".
+*   **Animations Fluides et Performantes**: `react-native-reanimated` est utilisé pour animer les transitions et les interactions avec les éléments glassmorphiques, offrant une expérience utilisateur dynamique et réactive sans compromettre les performances.
+*   **Lisibilité et Accessibilité**: Une attention particulière est portée au contraste pour garantir que le texte et les icônes restent parfaitement lisibles sur les fonds translucides, assurant ainsi une expérience accessible pour tous les utilisateurs.
 
 ## Technologies Utilisées
 
@@ -86,6 +96,7 @@
 ### Interface Utilisateur
 *   **Lucide React Native** - Bibliothèque d'icônes modernes et personnalisables
 *   **Expo Linear Gradient** - Dégradés et effets visuels avancés
+*   **Expo Blur** - Effets de flou d'arrière-plan pour le glassmorphisme
 *   **React Native Reanimated 3.17.4** - Animations haute performance
 *   **React Native Gesture Handler 2.24.0** - Gestion avancée des gestes
 
@@ -110,6 +121,7 @@ L'application suit le pattern MVVM pour une séparation claire des responsabilit
 
 ### Architecture Modulaire
 *   **Composants Réutilisables** : Bibliothèque de composants UI cohérents
+*   **Design System Glassmorphique**: Intégration des principes glassmorphiques à travers des composants dédiés et des styles cohérents.
 *   **Services** : Couche d'abstraction pour les API externes
 *   **Utilitaires** : Fonctions pures pour le traitement des données
 *   **Types TypeScript** : Définitions strictes pour la sécurité des types
@@ -194,7 +206,9 @@ yarn build:web
 │   │   ├── FilterBar.tsx        # Barre de filtres
 │   │   ├── EmptyState.tsx       # État vide
 │   │   ├── AudioPlayer.tsx      # Lecteur audio (méditation)
-│   │   └── SocialMediaFab.tsx   # Bouton flottant réseaux sociaux
+│   │   ├── SocialMediaFab.tsx   # Bouton flottant réseaux sociaux
+│   │   ├── GlassmorphicContainer.tsx # Conteneur glassmorphique
+│   │   └── SessionCard.tsx      # Carte de session (pour VIP)
 │   ├── screens/                 # Composants spécifiques aux écrans
 │   │   └── MeetingLinkList.tsx  # Liste de liens avec filtres
 │   └── icons/                   # Icônes personnalisées
@@ -320,6 +334,7 @@ const COLORS = {
   textLight: '#718096',     // Texte secondaire
 };
 ```
+Pour personnaliser les effets glassmorphiques, ajustez les propriétés du `GlassmorphicContainer` (intensité, couleurs de dégradé, bordures) ou les styles directement appliqués dans les composants UI.
 
 ### Configuration Responsive
 Ajustement des breakpoints dans `utils/responsive.ts` :
@@ -461,18 +476,3 @@ Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de 
 ---
 
 **MinderLink** | Simplifiez la gestion de vos réunions, une connexion à la fois.
-
-Développé avec ❤️ par l'équipe MinderLink
-
-Pour plus d'informations, visitez [notre site web](https://1min4peace.org)
-
----
-
-<div align="center">
-  <p>
-    <a href="https://www.facebook.com/1min4peace/">Facebook</a> •
-    <a href="https://www.youtube.com/@1min4peace">YouTube</a> •
-    <a href="https://x.com/1min4peace">X (Twitter)</a> •
-    <a href="https://1min4peace.org/">Site Web</a>
-  </p>
-</div>
