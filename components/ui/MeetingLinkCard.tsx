@@ -492,6 +492,9 @@ const styles = StyleSheet.create({
   passwordVeil: {
     borderRadius: 8,
   },
+  veilTouchable: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     alignItems: 'center',
   },
 });
