@@ -491,10 +491,14 @@ const styles = StyleSheet.create({
   },
   passwordVeil: {
     borderRadius: 8,
+    alignItems: 'center',
   },
   veilTouchable: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
     alignItems: 'center',
+  },
+  veilText: {
+    fontSize: 12,
+    color: '#4A5568',
+    fontStyle: 'italic',
   },
 });
