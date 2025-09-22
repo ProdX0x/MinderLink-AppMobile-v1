@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { Calendar, Clock, Users, Lock, Globe, Video, Phone } from 'lucide-react-native';
+import { GlassmorphicContainer } from './GlassmorphicContainer';
 import type { MeetingLinkCardProps } from '@/types';
 import { formatMeetingLinkDate, isPrivateLink, isPublicLink, getPlatformDisplayName, getPlatformIcon } from '@/utils/meetingLink';
 import { useResponsive } from '@/hooks/useResponsive';
@@ -48,11 +49,29 @@ export const MeetingLinkCard: React.FC<MeetingLinkCardProps> = ({
   const accessibilityDescription = `Réunion ${meetingLink.title}, organisée par ${meetingLink.organizer}, le ${formatMeetingLinkDate(meetingLink.date)} à ${meetingLink.time}, durée ${meetingLink.duration} minutes, plateforme ${platformName}`;
 
   return (
-    <View style={[
-      styles.meetingCard,
-      { borderLeftColor: isPrivate ? '#F4A460' : '#48BB78' },
-      isMeetingActive && styles.meetingCardActive
-    ]}>
+    <GlassmorphicContainer
+      style={[
+        styles.meetingCard,
+        { borderLeftColor: isPrivate ? '#F4A460' : '#48BB78' },
+        isMeetingActive && styles.meetingCardActive
+      ]}
+      gradientColors={
+        isPrivate 
+          ? [
+              'rgba(244, 164, 96, 0.15)',
+              'rgba(255, 224, 179, 0.1)',
+              'rgba(255, 255, 255, 0.08)',
+              'rgba(176, 255, 255, 0.05)'
+            ]
+          : [
+              'rgba(72, 187, 120, 0.15)',
+              'rgba(255, 255, 255, 0.12)',
+              'rgba(176, 255, 255, 0.08)',
+              'rgba(77, 205, 205, 0.05)'
+            ]
+      }
+      shadowIntensity={isMeetingActive ? 'strong' : 'medium'}
+    >
       {/* En-tête de la carte - Cliquable pour expansion */}
       <TouchableOpacity
         style={styles.meetingHeader}
@@ -175,14 +194,27 @@ export const MeetingLinkCard: React.FC<MeetingLinkCardProps> = ({
                   {MeetingLinkService.formatLinkForDisplay(meetingLink.link, 40)}
                 </Text>
               ) : (
-                <TouchableOpacity
+                <GlassmorphicContainer
+                  intensity={15}
                   style={styles.linkVeil}
-                  onPress={handleUnlockPress}
-                  accessibilityLabel="Révéler le lien"
-                  accessibilityHint="Appuyez pour saisir le mot de passe"
+                  gradientColors={[
+                    'rgba(247, 250, 252, 0.6)',
+                    'rgba(226, 232, 240, 0.4)',
+                    'rgba(255, 255, 255, 0.3)'
+                  ]}
+                  borderColor="rgba(226, 232, 240, 0.6)"
+                  borderWidth={1}
+                  shadowIntensity="light"
                 >
-                  <Text style={styles.veilText}>Cliquez pour révéler</Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={handleUnlockPress}
+                    accessibilityLabel="Révéler le lien"
+                    accessibilityHint="Appuyez pour saisir le mot de passe"
+                    style={styles.veilTouchable}
+                  >
+                    <Text style={styles.veilText}>Cliquez pour révéler</Text>
+                  </TouchableOpacity>
+                </GlassmorphicContainer>
               )}
             </View>
 
@@ -193,14 +225,27 @@ export const MeetingLinkCard: React.FC<MeetingLinkCardProps> = ({
                 {isUnlocked ? (
                   <Text style={styles.connectionValue}>{meetingLink.password}</Text>
                 ) : (
-                  <TouchableOpacity
+                  <GlassmorphicContainer
+                    intensity={15}
                     style={styles.passwordVeil}
-                    onPress={handleUnlockPress}
-                    accessibilityLabel="Révéler le mot de passe"
-                    accessibilityHint="Appuyez pour saisir le mot de passe d'accès"
+                    gradientColors={[
+                      'rgba(247, 250, 252, 0.6)',
+                      'rgba(226, 232, 240, 0.4)',
+                      'rgba(255, 255, 255, 0.3)'
+                    ]}
+                    borderColor="rgba(226, 232, 240, 0.6)"
+                    borderWidth={1}
+                    shadowIntensity="light"
                   >
-                    <Text style={styles.veilText}>Cliquez pour révéler</Text>
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={handleUnlockPress}
+                      accessibilityLabel="Révéler le mot de passe"
+                      accessibilityHint="Appuyez pour saisir le mot de passe d'accès"
+                      style={styles.veilTouchable}
+                    >
+                      <Text style={styles.veilText}>Cliquez pour révéler</Text>
+                    </TouchableOpacity>
+                  </GlassmorphicContainer>
                 )}
               </View>
             )}
@@ -226,32 +271,18 @@ export const MeetingLinkCard: React.FC<MeetingLinkCardProps> = ({
           />
         </View>
       )}
-    </View>
+    </GlassmorphicContainer>
   );
 };
 
 const styles = StyleSheet.create({
   meetingCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderRadius: 15,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
     borderLeftWidth: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   meetingCardActive: {
     borderColor: '#48BB78',
     borderWidth: 2,
-    shadowColor: '#48BB78',
-    shadowOpacity: 0.3,
   },
   meetingHeader: {
     padding: 16,
@@ -459,17 +490,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   passwordVeil: {
-    backgroundColor: 'rgba(247, 250, 252, 0.8)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(226, 232, 240, 0.6)',
-    borderStyle: 'dashed',
-    alignItems: 'center',
   },
-  veilText: {
-    fontSize: 12,
-    color: '#999',
+    alignItems: 'center',
   },
 });

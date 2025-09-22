@@ -12,6 +12,7 @@ import { getSessionAccessibilityDescription } from '@/utils/accessibility';
 import { useResponsive } from '@/hooks/useResponsive';
 import { useLanguage } from '@/context/LanguageContext';
 import { Button } from './Button';
+import { GlassmorphicContainer } from './GlassmorphicContainer';
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -72,10 +73,28 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   const canJoin = isPublic || (isVip && isUnlocked);
 
   return (
-    <View style={[
-      styles.sessionCard,
-      { borderLeftColor: isVip ? '#F4A460' : '#48BB78' }
-    ]}>
+    <GlassmorphicContainer
+      style={[
+        styles.sessionCard,
+        { borderLeftColor: isVip ? '#F4A460' : '#48BB78' }
+      ]}
+      gradientColors={
+        isVip 
+          ? [
+              'rgba(244, 164, 96, 0.15)',
+              'rgba(255, 224, 179, 0.1)',
+              'rgba(255, 255, 255, 0.08)',
+              'rgba(176, 255, 255, 0.05)'
+            ]
+          : [
+              'rgba(72, 187, 120, 0.15)',
+              'rgba(255, 255, 255, 0.12)',
+              'rgba(176, 255, 255, 0.08)',
+              'rgba(77, 205, 205, 0.05)'
+            ]
+      }
+      shadowIntensity="medium"
+    >
       {/* En-tête de la carte - Cliquable pour expansion */}
       <TouchableOpacity
         style={styles.sessionHeader}
@@ -237,14 +256,27 @@ export const SessionCard: React.FC<SessionCardProps> = ({
                 {isUnlocked ? (
                   <Text style={styles.connectionValue}>{session.password}</Text>
                 ) : (
-                  <TouchableOpacity
+                  <GlassmorphicContainer
+                    intensity={15}
                     style={styles.passwordVeil}
-                    onPress={handleUnlockPress}
-                    accessibilityLabel="Révéler le mot de passe"
-                    accessibilityHint="Appuyez pour saisir le mot de passe VIP"
+                    gradientColors={[
+                      'rgba(247, 250, 252, 0.6)',
+                      'rgba(226, 232, 240, 0.4)',
+                      'rgba(255, 255, 255, 0.3)'
+                    ]}
+                    borderColor="rgba(226, 232, 240, 0.6)"
+                    borderWidth={1}
+                    shadowIntensity="light"
                   >
-                    <Text style={styles.veilText}>Cliquez pour révéler</Text>
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={handleUnlockPress}
+                      accessibilityLabel="Révéler le mot de passe"
+                      accessibilityHint="Appuyez pour saisir le mot de passe VIP"
+                      style={styles.veilTouchable}
+                    >
+                      <Text style={styles.veilText}>Cliquez pour révéler</Text>
+                    </TouchableOpacity>
+                  </GlassmorphicContainer>
                 )}
               </View>
             )}
@@ -289,26 +321,14 @@ export const SessionCard: React.FC<SessionCardProps> = ({
           />
         </View>
       )}
-    </View>
+    </GlassmorphicContainer>
   );
 };
 
 const styles = StyleSheet.create({
   sessionCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderRadius: 15,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
     borderLeftWidth: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   sessionHeader: {
     padding: 16,
@@ -496,13 +516,11 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   passwordVeil: {
-    backgroundColor: 'rgba(247, 250, 252, 0.8)',
+    borderRadius: 8,
+  },
+  veilTouchable: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(226, 232, 240, 0.6)',
-    borderStyle: 'dashed',
     alignItems: 'center',
   },
   veilText: {

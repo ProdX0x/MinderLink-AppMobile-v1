@@ -18,6 +18,7 @@ import {
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLanguage } from '@/context/LanguageContext';
+import { GlassmorphicContainer } from '@/components/ui/GlassmorphicContainer';
 
 const { width, height } = Dimensions.get('window');
 
@@ -158,35 +159,53 @@ export default function LanguageSelectScreen() {
                     }
                   ]}
                 >
-                  <LinearGradient
-                    colors={
-                      selectedLanguageId === country.id
-                        ? ['#FFE0B3', '#FFC266', '#FF9933', '#E67A00', '#CC5500']
-                        : [
-                            'rgba(255, 255, 255, 0.2)',
-                            'rgba(42, 153, 153, 0.25)',
-                            'rgba(32, 123, 123, 0.3)'
-                          ]
-                    }
-                    locations={selectedLanguageId === country.id ? [0, 0.15, 0.4, 0.7, 1] : [0, 0.5, 1]}
-                    style={[
-                      styles.flagButton,
-                      selectedLanguageId === country.id && styles.flagButtonSelected
-                    ]}
-                  >
-                    <View style={styles.flagContent}>
-                      <Text style={styles.flagEmoji}>{country.flag}</Text>
-                      <Text 
-                        style={[
-                          styles.flagName,
-                          selectedLanguageId === country.id && styles.flagNameSelected
-                        ]} 
-                        numberOfLines={1}
-                      >
-                        {country.name}
-                      </Text>
-                    </View>
-                  </LinearGradient>
+                  {selectedLanguageId === country.id ? (
+                    <LinearGradient
+                      colors={['#FFE0B3', '#FFC266', '#FF9933', '#E67A00', '#CC5500']}
+                      locations={[0, 0.15, 0.4, 0.7, 1]}
+                      style={[
+                        styles.flagButton,
+                        styles.flagButtonSelected
+                      ]}
+                    >
+                      <View style={styles.flagContent}>
+                        <Text style={styles.flagEmoji}>{country.flag}</Text>
+                        <Text 
+                          style={[
+                            styles.flagName,
+                            styles.flagNameSelected
+                          ]} 
+                          numberOfLines={1}
+                        >
+                          {country.name}
+                        </Text>
+                      </View>
+                    </LinearGradient>
+                  ) : (
+                    <GlassmorphicContainer
+                      style={styles.flagButton}
+                      intensity={15}
+                      gradientColors={[
+                        'rgba(255, 255, 255, 0.3)',
+                        'rgba(42, 153, 153, 0.2)',
+                        'rgba(32, 123, 123, 0.25)'
+                      ]}
+                      borderRadius={BASE_UNIT * 2}
+                      borderColor="rgba(255, 255, 255, 0.3)"
+                      borderWidth={1}
+                      shadowIntensity="medium"
+                    >
+                      <View style={styles.flagContent}>
+                        <Text style={styles.flagEmoji}>{country.flag}</Text>
+                        <Text 
+                          style={styles.flagName} 
+                          numberOfLines={1}
+                        >
+                          {country.name}
+                        </Text>
+                      </View>
+                    </GlassmorphicContainer>
+                  )}
                 </TouchableOpacity>
               ))}
             </View>
@@ -325,29 +344,20 @@ const styles = StyleSheet.create({
   },
 
   flagButton: {
-    borderRadius: BASE_UNIT * 2,
     marginBottom: BASE_UNIT * 2,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
-    position: 'relative',
-    overflow: 'hidden',
     flex: 1,
   },
 
   flagButtonSelected: {
+    borderRadius: BASE_UNIT * 2,
     shadowColor: '#F4A460',
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
     shadowOpacity: 0.3,
     shadowRadius: 16,
     elevation: 10,
-    borderColor: '#F4A460',
   },
 
   flagContent: {

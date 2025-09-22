@@ -23,6 +23,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { useResponsive } from '@/hooks/useResponsive';
 import { XIcon } from '@/components/icons/XIcon';
+import { GlassmorphicContainer } from './GlassmorphicContainer';
 
 // Configuration des réseaux sociaux
 const SOCIAL_NETWORKS = [
@@ -158,26 +159,30 @@ const FabItem: React.FC<FabItemProps> = ({
   const iconSize = Math.max(16, baseUnit * 3);
   return (
     <Animated.View style={[styles.fabItem, animatedStyle]}>
-      <TouchableOpacity
-        onPress={handlePress}
-        activeOpacity={0.8}
-        accessibilityLabel={`Ouvrir ${network.name}`}
-        accessibilityRole="button"
+      <GlassmorphicContainer
         style={[styles.fabButton, { width: buttonSize, height: buttonSize }]}
+        intensity={20}
+        gradientColors={[
+          'rgba(255, 255, 255, 0.2)',
+          `rgba(${network.rgb}, 0.15)`,
+          `rgba(${network.rgb}, 0.25)`,
+          `rgba(${network.rgb}, 0.35)`
+        ]}
+        borderRadius={buttonSize / 2}
+        borderColor="rgba(255, 255, 255, 0.3)"
+        borderWidth={1}
+        shadowIntensity="medium"
       >
-        <LinearGradient
-          colors={[
-            'rgba(255, 255, 255, 0.3)',
-            `rgba(${network.rgb}, 0.25)`,
-            `rgba(${network.rgb}, 0.4)`,
-            `rgba(${network.rgb}, 0.55)`
-          ]}
-          locations={[0, 0.2, 0.6, 1]}
-          style={[styles.fabGradient, { borderRadius: buttonSize / 2 }]}
+        <TouchableOpacity
+          onPress={handlePress}
+          activeOpacity={0.8}
+          accessibilityLabel={`Ouvrir ${network.name}`}
+          accessibilityRole="button"
+          style={styles.fabTouchable}
         >
           <IconComponent size={iconSize} color="#FFFFFF" />
-        </LinearGradient>
-      </TouchableOpacity>
+        </TouchableOpacity>
+      </GlassmorphicContainer>
     </Animated.View>
   );
 };
@@ -282,29 +287,33 @@ export const SocialMediaFab: React.FC = () => {
       ))}
       
       {/* Bouton principal */}
-      <TouchableOpacity
-        onPress={handleMainButtonPress}
-        activeOpacity={0.8}
-        accessibilityLabel={isActive ? "Fermer le menu des réseaux sociaux" : "Ouvrir le menu des réseaux sociaux"}
-        accessibilityRole="button"
-        accessibilityState={{ expanded: isActive }}
+      <GlassmorphicContainer
         style={[styles.mainButton, { width: mainButtonSize, height: mainButtonSize }]}
+        intensity={25}
+        gradientColors={[
+          'rgba(255, 255, 255, 0.3)',
+          'rgba(176, 255, 255, 0.5)',
+          'rgba(77, 205, 205, 0.6)',
+          'rgba(42, 153, 153, 0.7)'
+        ]}
+        borderRadius={mainButtonSize / 2}
+        borderColor="rgba(255, 255, 255, 0.3)"
+        borderWidth={1}
+        shadowIntensity="strong"
       >
-        <Animated.View style={mainButtonAnimatedStyle}>
-          <LinearGradient
-            colors={[
-              'rgba(255, 255, 255, 0.4)',
-              'rgba(176, 255, 255, 0.7)',
-              'rgba(77, 205, 205, 0.8)',
-              'rgba(42, 153, 153, 0.9)'
-            ]}
-            locations={[0, 0.3, 0.7, 1]}
-            style={[styles.mainButtonGradient, { borderRadius: mainButtonSize / 2 }]}
-          >
+        <TouchableOpacity
+          onPress={handleMainButtonPress}
+          activeOpacity={0.8}
+          accessibilityLabel={isActive ? "Fermer le menu des réseaux sociaux" : "Ouvrir le menu des réseaux sociaux"}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: isActive }}
+          style={styles.mainButtonTouchable}
+        >
+          <Animated.View style={mainButtonAnimatedStyle}>
             <Share2 size={mainIconSize} color="#FFFFFF" />
-          </LinearGradient>
-        </Animated.View>
-      </TouchableOpacity>
+          </Animated.View>
+        </TouchableOpacity>
+      </GlassmorphicContainer>
     </View>
   );
 };
@@ -323,42 +332,26 @@ const styles = StyleSheet.create({
   },
   
   fabButton: {
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   
-  fabGradient: {
+  fabTouchable: {
     width: '100%',
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
   
   mainButton: {
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   
-  mainButtonGradient: {
+  mainButtonTouchable: {
     width: '100%',
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
   },
 });

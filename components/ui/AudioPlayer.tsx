@@ -9,6 +9,7 @@ import { Audio } from 'expo-av';
 import { Play, Pause, RotateCcw } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useResponsive } from '@/hooks/useResponsive';
+import { GlassmorphicContainer } from './GlassmorphicContainer';
 
 interface AudioPlayerProps {
   audioUrl: string;
@@ -166,17 +167,21 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
       </View>
 
       {/* Lecteur principal */}
-      <View style={styles.playerContainer}>
-        <LinearGradient
-          colors={[
-            'rgba(255, 255, 255, 0.3)',
-            'rgba(42, 153, 153, 0.35)',
-            'rgba(42, 153, 153, 0.45)',
-            'rgba(32, 123, 123, 0.5)'
-          ]}
-          locations={[0, 0.2, 0.5, 0.8]}
-          style={styles.playerGradient}
-        >
+      <GlassmorphicContainer
+        style={styles.playerContainer}
+        intensity={20}
+        gradientColors={[
+          'rgba(255, 255, 255, 0.25)',
+          'rgba(42, 153, 153, 0.25)',
+          'rgba(42, 153, 153, 0.35)',
+          'rgba(32, 123, 123, 0.4)'
+        ]}
+        borderRadius={20}
+        borderColor="rgba(255, 255, 255, 0.4)"
+        borderWidth={1}
+        shadowIntensity="strong"
+      >
+        <View style={styles.playerContent}>
           {/* Barre de progression */}
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
@@ -235,8 +240,8 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
             {/* Espace pour équilibrer */}
             <View style={styles.spacer} />
           </View>
-        </LinearGradient>
-      </View>
+        </View>
+      </GlassmorphicContainer>
 
       {/* Indication */}
       <Text style={styles.hint}>
@@ -278,19 +283,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   
-  playerGradient: {
-    borderRadius: 20,
+  playerContent: {
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
-    elevation: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
   },
   
   progressContainer: {
