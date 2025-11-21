@@ -8,8 +8,9 @@ import { View, FlatList, StyleSheet } from 'react-native';
 import { MeetingLinkCard } from '@/components/ui/MeetingLinkCard';
 import { FilterBar } from '@/components/ui/FilterBar';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { EditMeetingModal } from '@/components/ui/EditMeetingModal';
 import { useMeetingLinkFilters } from '@/hooks/useMeetingLinkFilters';
-import type { MeetingLink, DayFilter, PlatformFilter } from '@/types';
+import type { MeetingLink, DayFilter, PlatformFilter, UpdateMeetingInput } from '@/types';
 import { MeetingLinkService } from '@/services/meetingLinkService';
 
 // Configuration des filtres
@@ -40,6 +41,8 @@ interface MeetingLinkListProps {
   emptyStateIcon?: React.ReactNode;
   showFilters?: boolean;
   defaultToToday?: boolean;
+  onEditMeeting?: (data: UpdateMeetingInput) => Promise<void>;
+  enableEditing?: boolean;
 }
 
 export const MeetingLinkList: React.FC<MeetingLinkListProps> = ({
@@ -51,8 +54,12 @@ export const MeetingLinkList: React.FC<MeetingLinkListProps> = ({
   emptyStateIcon,
   showFilters = true,
   defaultToToday = false,
+  onEditMeeting,
+  enableEditing = false,
 }) => {
   const [expandedMeetingLink, setExpandedMeetingLink] = useState<string | null>(null);
+  const [editingMeeting, setEditingMeeting] = useState<MeetingLink | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
   
   const {
     selectedDay,
@@ -70,14 +77,33 @@ export const MeetingLinkList: React.FC<MeetingLinkListProps> = ({
     MeetingLinkService.joinMeetingLink(meetingLink);
   };
 
+  const handleEditMeeting = (meetingLink: MeetingLink) => {
+    setEditingMeeting(meetingLink);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = async (data: UpdateMeetingInput) => {
+    if (onEditMeeting) {
+      await onEditMeeting(data);
+      setShowEditModal(false);
+      setEditingMeeting(null);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setShowEditModal(false);
+    setEditingMeeting(null);
+  };
+
   const renderMeetingLink = ({ item }: { item: MeetingLink }) => (
     <MeetingLinkCard
       meetingLink={item}
       isExpanded={expandedMeetingLink === item.id}
       onPress={() => handleMeetingLinkPress(item.id)}
-      onJoinMeetingLink={handleJoinMeetingLink}
+      onJoinMeeting={handleJoinMeetingLink}
       isUnlocked={unlockedMeetingLinks.includes(item.id)}
       onUnlockRequest={onUnlockRequest}
+      onEdit={enableEditing ? handleEditMeeting : undefined}
     />
   );
 
@@ -120,6 +146,15 @@ export const MeetingLinkList: React.FC<MeetingLinkListProps> = ({
           icon={emptyStateIcon}
         />
       )}
+
+      {/* Modal d'édition */}
+      <EditMeetingModal
+        visible={showEditModal}
+        onClose={handleCloseModal}
+        onSave={handleSaveEdit}
+        meeting={editingMeeting || undefined}
+        type="meeting"
+      />
     </View>
   );
 };

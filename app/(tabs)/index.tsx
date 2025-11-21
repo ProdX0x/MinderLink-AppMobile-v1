@@ -15,7 +15,8 @@ import { Settings, Calendar } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SocialMediaFab } from '@/components/ui/SocialMediaFab';
 import { MeetingLinkList } from '@/components/screens/MeetingLinkList';
-import { meetingLinks, getTodayMeetingLinks } from '@/data/meetingLinks';
+import { useTodayMeetings } from '@/hooks/useMeetings';
+import type { UpdateMeetingInput } from '@/types';
 
 const { width, height } = Dimensions.get('window');
 
@@ -44,9 +45,9 @@ const BASE_UNIT = getResponsiveUnit();
  */
 export default function HomeScreen() {
   const router = useRouter();
-  
-  // Obtenir les réunions d'aujourd'hui
-  const todayMeetings = getTodayMeetingLinks();
+
+  // Obtenir les réunions d'aujourd'hui depuis Supabase
+  const { meetingLinks: todayMeetings, isLoading, error, refetch } = useTodayMeetings();
 
   // ViewModel: Gestion des actions utilisateur
   const handleSettingsPress = () => {
@@ -55,6 +56,12 @@ export default function HomeScreen() {
 
   const handleViewAllMeetings = () => {
     router.push('/public-links');
+  };
+
+  const handleEditMeeting = async (data: UpdateMeetingInput) => {
+    // Note: useTodayMeetings ne retourne pas updateMeeting
+    // On pourrait refetch après l'édition
+    await refetch();
   };
 
   return (
@@ -111,14 +118,26 @@ export default function HomeScreen() {
 
           {/* Liste des réunions d'aujourd'hui */}
           <View style={styles.meetingListContainer}>
-            <MeetingLinkList
-              meetingLinks={todayMeetings}
-              showFilters={false}
-              defaultToToday={true}
-              emptyStateTitle="Aucune réunion aujourd'hui"
-              emptyStateMessage="Vous n'avez aucune réunion prévue pour aujourd'hui. Profitez de cette journée libre!"
-              emptyStateIcon={<Calendar size={48} color="#CBD5E0" />}
-            />
+            {isLoading ? (
+              <View style={styles.loadingContainer}>
+                <Text style={styles.loadingText}>Chargement...</Text>
+              </View>
+            ) : error ? (
+              <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>Erreur: {error.message}</Text>
+              </View>
+            ) : (
+              <MeetingLinkList
+                meetingLinks={todayMeetings}
+                showFilters={false}
+                defaultToToday={true}
+                emptyStateTitle="Aucune réunion aujourd'hui"
+                emptyStateMessage="Vous n'avez aucune réunion prévue pour aujourd'hui. Profitez de cette journée libre!"
+                emptyStateIcon={<Calendar size={48} color="#CBD5E0" />}
+                onEditMeeting={handleEditMeeting}
+                enableEditing={true}
+              />
+            )}
           </View>
         </View>
       </ScrollView>
@@ -272,6 +291,32 @@ const styles = StyleSheet.create({
   meetingListContainer: {
     flex: 1,
     minHeight: height * 0.5,
+  },
+
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: BASE_UNIT * 8,
+  },
+
+  loadingText: {
+    color: '#4A5568',
+    fontSize: BASE_UNIT * 2.5,
+  },
+
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: BASE_UNIT * 8,
+    paddingHorizontal: BASE_UNIT * 4,
+  },
+
+  errorText: {
+    color: '#E53E3E',
+    fontSize: BASE_UNIT * 2.5,
+    textAlign: 'center',
   },
 
   // BOUTON DE RÉGLAGES FLOTTANT

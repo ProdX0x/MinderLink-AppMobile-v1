@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
-import { Calendar, Clock, Users, Lock, Globe, Video, Phone } from 'lucide-react-native';
+import { Calendar, Clock, Users, Lock, Globe, Video, Phone, Edit } from 'lucide-react-native';
 import type { MeetingLinkCardProps } from '@/types';
 import { formatMeetingLinkDate, isPrivateLink, isPublicLink, getPlatformDisplayName, getPlatformIcon } from '@/utils/meetingLink';
 import { useResponsive } from '@/hooks/useResponsive';
@@ -21,6 +21,7 @@ export const MeetingLinkCard: React.FC<MeetingLinkCardProps> = ({
   onJoinMeeting,
   isUnlocked = false,
   onUnlockRequest,
+  onEdit,
 }) => {
   const { fontSizes, spacing } = useResponsive();
   const isPrivate = isPrivateLink(meetingLink);
@@ -63,12 +64,25 @@ export const MeetingLinkCard: React.FC<MeetingLinkCardProps> = ({
         accessibilityState={{ expanded: isExpanded }}
       >
         <View style={styles.meetingInfo}>
-          {/* Ligne de titre avec badge */}
+          {/* Ligne de titre avec badge et bouton d'édition */}
           <View style={styles.meetingTitleRow}>
             <Text style={styles.meetingTitle} numberOfLines={2}>
               {meetingLink.title}
             </Text>
             <View style={styles.badgeContainer}>
+              {onEdit && (
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    onEdit(meetingLink);
+                  }}
+                  accessibilityLabel="Éditer la réunion"
+                  accessibilityRole="button"
+                >
+                  <Edit size={16} color="#4299E1" />
+                </TouchableOpacity>
+              )}
               <Text style={styles.platformIcon}>{platformIcon}</Text>
               <View style={[
                 styles.categoryBadge,
@@ -471,5 +485,11 @@ const styles = StyleSheet.create({
   veilText: {
     fontSize: 12,
     color: '#999',
+  },
+  editButton: {
+    padding: 6,
+    marginRight: 8,
+    backgroundColor: 'rgba(66, 153, 225, 0.1)',
+    borderRadius: 8,
   },
 });
