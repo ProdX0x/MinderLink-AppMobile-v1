@@ -34,38 +34,38 @@ function RootLayoutNav() {
 
   const determineInitialRoute = async () => {
     try {
-      console.log('🚀 [MINDERLINK-ROOT-LAYOUT] Détermination de la route initiale...');
+      console.log('🚀 [ROOT-LAYOUT] Détermination de la route initiale...');
       
       // TEMPORAIRE - Décommentez pour reset (pour les tests)
       await AsyncStorage.removeItem('hasSeenSlider');
       await AsyncStorage.removeItem('selectedLanguage');
-      console.log('🔄 [MINDERLINK-ROOT-LAYOUT] Données réinitialisées pour les tests');
+      console.log('🔄 [ROOT-LAYOUT] Données réinitialisées pour les tests');
 
       // Vérifier la langue sélectionnée
       const selectedLanguage = await AsyncStorage.getItem('selectedLanguage');
-      console.log('🌍 [MINDERLINK-ROOT-LAYOUT] Langue stockée:', selectedLanguage);
+      console.log('🌍 [ROOT-LAYOUT] Langue stockée:', selectedLanguage);
       
       // Vérifier si l'intro a été vue
       const hasSeenSlider = await AsyncStorage.getItem('hasSeenSlider');
-      console.log('👁️ [MINDERLINK-ROOT-LAYOUT] A vu l\'intro:', hasSeenSlider);
+      console.log('👁️ [ROOT-LAYOUT] A vu l\'intro:', hasSeenSlider);
 
       let targetRoute = '/';
 
       // Logique de navigation :
       if (!selectedLanguage) {
-        console.log('📍 [MINDERLINK-ROOT-LAYOUT] Aucune langue → Sélection de langue');
+        console.log('📍 [ROOT-LAYOUT] Aucune langue → Sélection de langue');
         targetRoute = '/language-select';
       } else if (hasSeenSlider !== 'true') {
-        console.log('📍 [MINDERLINK-ROOT-LAYOUT] Langue OK, intro pas vue → Splash screen');
+        console.log('📍 [ROOT-LAYOUT] Langue OK, intro pas vue → Splash screen');
         targetRoute = '/';  // Le splash screen est à la racine
       } else {
-        console.log('📍 [MINDERLINK-ROOT-LAYOUT] Tout OK → Écran principal');
+        console.log('📍 [ROOT-LAYOUT] Tout OK → Écran principal');
         targetRoute = '/(tabs)';
       }
 
       // Navigation vers la route déterminée
       if (segments.length === 0 || segments[0] !== targetRoute.replace('/', '')) {
-        console.log('🎯 [MINDERLINK-ROOT-LAYOUT] Navigation vers:', targetRoute);
+        console.log('🎯 [ROOT-LAYOUT] Navigation vers:', targetRoute);
         router.replace(targetRoute as any);
       }
 
@@ -73,7 +73,7 @@ function RootLayoutNav() {
       await SplashScreen.hideAsync();
       
     } catch (error) {
-      console.error('❌ [MINDERLINK-ROOT-LAYOUT] Erreur lors de la détermination:', error);
+      console.error('❌ [ROOT-LAYOUT] Erreur lors de la détermination:', error);
       // En cas d'erreur, aller vers la sélection de langue par sécurité
       router.replace('/language-select');
       setInitialRouteDetermined(true);
@@ -91,9 +91,9 @@ function RootLayoutNav() {
       <Stack.Screen name="index" />
       <Stack.Screen name="language-select" />
       <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="public-links" />
-      <Stack.Screen name="private-links" />
-      <Stack.Screen name="private-auth" />
+      <Stack.Screen name="public-sessions" />
+      <Stack.Screen name="vip-sessions" />
+      <Stack.Screen name="vip-auth" />
       <Stack.Screen name="settings" />
       <Stack.Screen name="+not-found" />
     </Stack>

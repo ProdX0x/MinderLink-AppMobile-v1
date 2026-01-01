@@ -1,42 +1,36 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, Modal, View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { SafeAreaView, StyleSheet, Modal, View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Lock } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Header } from '@/components/ui/Header';
-import { MeetingLinkList } from '@/components/screens/MeetingLinkList';
+import { SessionsList } from '@/components/screens/SessionsList';
 import { Button } from '@/components/ui/Button';
-import { useMeetings } from '@/hooks/useMeetings';
-import type { UpdateMeetingInput } from '@/types';
+import { vipSessions } from '@/data/sessions';
+
 
 /**
- * Écran des liens privés
- * Utilise Supabase et permet l'édition des réunions
+ * Écran des sessions VIP
+ * Utilise l'architecture modulaire avec gestion d'authentification
  */
-export default function PrivateLinksScreen() {
+export default function VipSessionsScreen() {
   const router = useRouter();
-  const [unlockedMeetingLinks, setUnlockedMeetingLinks] = useState<string[]>([]);
+  const [unlockedSessions, setUnlockedSessions] = useState<string[]>([]);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [currentMeetingLinkId, setCurrentMeetingLinkId] = useState<string | null>(null);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [passwordInput, setPasswordInput] = useState('');
 
-  // Utiliser le hook Supabase pour récupérer les meetings
-  const { meetingLinks, isLoading, error, refetch, updateMeeting } = useMeetings({
-    type: 'meeting',
-    category: 'private',
-  });
-
-  const handleUnlockRequest = (meetingLinkId: string) => {
-    setCurrentMeetingLinkId(meetingLinkId);
+  const handleUnlockRequest = (sessionId: string) => {
+    setCurrentSessionId(sessionId);
     setShowPasswordModal(true);
   };
 
   const handlePasswordSubmit = () => {
-    if (passwordInput === '661' && currentMeetingLinkId) {
-      setUnlockedMeetingLinks([...unlockedMeetingLinks, currentMeetingLinkId]);
+    if (passwordInput === '661' && currentSessionId) {
+      setUnlockedSessions([...unlockedSessions, currentSessionId]);
       setShowPasswordModal(false);
       setPasswordInput('');
-      setCurrentMeetingLinkId(null);
+      setCurrentSessionId(null);
     } else {
       Alert.alert(
         'Accès refusé',
@@ -45,43 +39,6 @@ export default function PrivateLinksScreen() {
       );
       setPasswordInput('');
     }
-  };
-
-  const handleEditMeeting = async (data: UpdateMeetingInput) => {
-    await updateMeeting(data);
-    await refetch();
-  };
-
-  if (isLoading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <LinearGradient
-          colors={['#4DCDCD', '#3BBABA', '#2A9999']}
-          locations={[0, 0.7, 1]}
-          style={styles.backgroundGradient}
-        />
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FFFFFF" />
-          <Text style={styles.loadingText}>Chargement des réunions...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  if (error) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <LinearGradient
-          colors={['#4DCDCD', '#3BBABA', '#2A9999']}
-          locations={[0, 0.7, 1]}
-          style={styles.backgroundGradient}
-        />
-        <Header title="Liens Privés" onBackPress={() => router.back()} />
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Erreur: {error.message}</Text>
-        </View>
-      </SafeAreaView>
-    );
   };
 
   return (
@@ -94,19 +51,17 @@ export default function PrivateLinksScreen() {
       />
       
       <Header
-        title="Liens Privés"
+        title="Sessions VIP"
         onBackPress={() => router.back()}
       />
       
-      <MeetingLinkList
-        meetingLinks={meetingLinks}
+      <SessionsList
+        sessions={vipSessions}
         onUnlockRequest={handleUnlockRequest}
-        unlockedMeetingLinks={unlockedMeetingLinks}
-        emptyStateTitle="Aucun lien privé disponible"
-        emptyStateMessage="Aucun lien privé ne correspond à vos critères de recherche"
+        unlockedSessions={unlockedSessions}
+        emptyStateTitle="Aucune session VIP disponible"
+        emptyStateMessage="Aucune session VIP ne correspond à vos critères de recherche"
         emptyStateIcon={<Lock size={48} color="#CBD5E0" />}
-        onEditMeeting={handleEditMeeting}
-        enableEditing={true}
       />
 
       {/* Modal de saisie du mot de passe */}
@@ -118,16 +73,16 @@ export default function PrivateLinksScreen() {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Accès requis</Text>
+            <Text style={styles.modalTitle}>Accès VIP requis</Text>
             <Text style={styles.modalSubtitle}>
-              Entrez le mot de passe pour révéler les informations du lien
+              Entrez le mot de passe VIP pour révéler les informations de connexion
             </Text>
             
             <TextInput
               style={styles.passwordModalInput}
               value={passwordInput}
               onChangeText={setPasswordInput}
-              placeholder="Mot de passe"
+              placeholder="Mot de passe VIP"
               secureTextEntry
               keyboardType="numeric"
               onSubmitEditing={handlePasswordSubmit}
@@ -139,7 +94,7 @@ export default function PrivateLinksScreen() {
                 onPress={() => {
                   setShowPasswordModal(false);
                   setPasswordInput('');
-                  setCurrentMeetingLinkId(null);
+                  setCurrentSessionId(null);
                 }}
                 variant="outline"
                 style={styles.modalButton}
@@ -170,27 +125,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    marginTop: 16,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  errorText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    textAlign: 'center',
   },
   modalOverlay: {
     flex: 1,

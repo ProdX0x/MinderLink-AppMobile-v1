@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ScrollView } from 'react-native';
-import { Calendar, Clock, Users, Lock, Globe, Edit } from 'lucide-react-native';
+import { Calendar, Clock, Users, Lock, Globe } from 'lucide-react-native';
 import type { SessionCardProps, LanguageFilter } from '@/types';
 import { formatSessionDate, isVipSession, isPublicSession } from '@/utils/session';
 import { getSessionAccessibilityDescription } from '@/utils/accessibility';
@@ -32,7 +32,6 @@ export const SessionCard: React.FC<SessionCardProps> = ({
   onJoinSession,
   isUnlocked = false,
   onUnlockRequest,
-  onEdit,
 }) => {
   const { fontSizes, spacing } = useResponsive();
   const { selectedLanguage } = useLanguage();
@@ -87,25 +86,12 @@ export const SessionCard: React.FC<SessionCardProps> = ({
         accessibilityState={{ expanded: isExpanded }}
       >
         <View style={styles.sessionInfo}>
-          {/* Ligne de titre avec badge et bouton d'édition */}
+          {/* Ligne de titre avec badge */}
           <View style={styles.sessionTitleRow}>
             <Text style={styles.sessionRegion} numberOfLines={2}>
               {session.region}
             </Text>
             <View style={styles.badgeContainer}>
-              {onEdit && (
-                <TouchableOpacity
-                  style={styles.editButton}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    onEdit(session);
-                  }}
-                  accessibilityLabel="Éditer la session"
-                  accessibilityRole="button"
-                >
-                  <Edit size={16} color="#4299E1" />
-                </TouchableOpacity>
-              )}
               {selectedLang && (
                 <Text style={styles.languageFlag}>{selectedLang.flag}</Text>
               )}
@@ -530,11 +516,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#4299E1',
     marginBottom: 2,
-  },
-  editButton: {
-    padding: 6,
-    marginRight: 8,
-    backgroundColor: 'rgba(66, 153, 225, 0.1)',
-    borderRadius: 8,
   },
 });

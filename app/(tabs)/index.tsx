@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   View, 
   Text, 
@@ -11,59 +11,67 @@ import {
   Image
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Settings, Calendar } from 'lucide-react-native';
+import { Lock, Users, Settings } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { AudioPlayer } from '@/components/ui/AudioPlayer';
 import { SocialMediaFab } from '@/components/ui/SocialMediaFab';
-import { MeetingLinkList } from '@/components/screens/MeetingLinkList';
-import { useTodayMeetings } from '@/hooks/useMeetings';
-import type { UpdateMeetingInput } from '@/types';
 
 const { width, height } = Dimensions.get('window');
 
-// Configuration responsive
+// ✅ CORRECTION 1: Détection d'écran plus précise
 const isSmallPhone = height < 700;
 const isMediumPhone = height >= 700 && height < 800;
 const isLargePhone = height >= 800;
 
+// ✅ CORRECTION 2: Système d'unités adaptatif optimisé pour smartphones
 const getResponsiveUnit = () => {
-  if (isSmallPhone) return 4;
-  if (isMediumPhone) return 5;
-  if (isLargePhone) return 6;
-  return 5;
+  if (isSmallPhone) return 4;      // Unités réduites pour petits écrans
+  if (isMediumPhone) return 5;     // Unités moyennes
+  if (isLargePhone) return 6;      // Unités standard pour grands écrans
+  return 5;                        // Fallback
 };
 
 const BASE_UNIT = getResponsiveUnit();
 
+// Distribution d'espace optimisée pour smartphones (mise à jour pour le lecteur audio)
+const getLayoutDistribution = () => {
+  if (isSmallPhone) {
+    // Petits écrans: Réduire header, augmenter audio
+    return { header: 0.25, action: 0.28, audio: 0.47 };
+  }
+  if (isMediumPhone) {
+    // Écrans moyens: Distribution équilibrée avec audio
+    return { header: 0.3, action: 0.28, audio: 0.42 };
+  }
+  // Grands écrans: Plus d'espace pour header, actions et audio
+  return { header: 0.3, action: 0.18, audio: 0.35 };
+};
+
 /**
  * Architecture MVVM avec gestion d'état optimisée
  * 
- * HomeScreen Component - Page d'accueil avec réunions du jour
+ * HomeScreen Component - Page d'accueil responsive
  * Implémente le pattern MVVM avec:
- * - Model: Configuration responsive et données de réunions
+ * - Model: Configuration responsive et lecteur audio
  * - View: Interface utilisateur adaptative
  * - ViewModel: Logique de présentation et navigation
  */
 export default function HomeScreen() {
   const router = useRouter();
-
-  // Obtenir les réunions d'aujourd'hui depuis Supabase
-  const { meetingLinks: todayMeetings, isLoading, error, refetch } = useTodayMeetings();
+  const layout = getLayoutDistribution();
 
   // ViewModel: Gestion des actions utilisateur
+  const handleVipAccess = () => {
+    router.push('/vip-auth');
+  };
+
+  const handlePublicAccess = () => {
+    router.push(`/public-sessions?country=fr`);
+  };
+
   const handleSettingsPress = () => {
     router.push('/settings');
   };
-
-  const handleViewAllMeetings = () => {
-    router.push('/public-links');
-  };
-
-  const handleEditMeeting = async (data: UpdateMeetingInput) => {
-    // Note: useTodayMeetings ne retourne pas updateMeeting
-    // On pourrait refetch après l'édition
-    await refetch();
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       {/* Dégradé d'arrière-plan radial turquoise */}
@@ -81,64 +89,108 @@ export default function HomeScreen() {
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-        {/* HEADER SECTION - Titre et logo */}
-        <View style={styles.headerSection}>
+        {/* HEADER SECTION - Tailles optimisées */}
+        <View style={[styles.headerSection, { minHeight: height * layout.header }]}>
           <View style={styles.logoContainer}>
-            <Image
-              source={require('../../assets/images/Logo4peace.png')}
-              style={styles.logoImage}
-            />
+            <View style={styles.logoWrapper}>
+              <View style={styles.sunContainer}>
+                {/* Logo 3D original - temporairement masqué */}
+                <LinearGradient
+                  colors={['#FFE0B3', '#FFC266', '#FF9933', '#E67A00', '#CC5500']}
+                  locations={[0, 0.15, 0.4, 0.7, 1]}
+                  style={[styles.sun, { display: 'none' }]}
+                >
+                  <View style={styles.sunHighlight} />
+                </LinearGradient>
+                
+                <LinearGradient
+                  colors={['#90EE90', '#32CD32', '#228B22']}
+                  locations={[0, 0.5, 1]}
+                  style={[styles.greenIndicator, { display: 'none' }]}
+                >
+                  <View style={styles.greenIndicatorHighlight} />
+                </LinearGradient>
+                
+                <View style={[styles.sunRays, { display: 'none' }]} />
+                <View style={[styles.cloud, { display: 'none' }]} />
+                <View style={[styles.leaf, { display: 'none' }]} />
+                
+                {/* Image de remplacement temporaire */}
+                <Image
+                  source={require('../../assets/images/Logo4peace.png')}
+                  style={styles.logoImage}
+                />
+              </View>
+            </View>
           </View>
           
           <View style={styles.titleContainer}>
-            <Text style={styles.mainTitle}>MinderLink</Text>
-            <Text style={styles.subtitle}>Gère tes liens de réunion!</Text>
+            <Text style={styles.mainTitle}>1Min4Peace</Text>
+            <Text style={styles.subtitle}>Une Chance à la Paix!</Text>
             <View style={styles.titleUnderline} />
           </View>
         </View>
 
-        {/* TODAY'S MEETINGS SECTION */}
-        <View style={styles.meetingsSection}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleRow}>
-              <Calendar size={24} color="#2D3748" />
-              <Text style={styles.sectionTitle}>Réunions d'aujourd'hui</Text>
-            </View>
-            
-            {todayMeetings.length > 0 && (
-              <TouchableOpacity 
-                onPress={handleViewAllMeetings}
-                style={styles.viewAllButton}
-                activeOpacity={0.7}
+        {/* ACTION SECTION - Boutons optimisés */}
+        <View style={[styles.actionSection, { minHeight: height * layout.action }]}>
+          <View style={styles.buttonContainer}>
+            {/* Bouton Orange VIP - Version 3D Avancée */}
+            <TouchableOpacity 
+              onPress={handleVipAccess}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={['#FFE0B3', '#FFC266', '#FF9933', '#E67A00', '#CC5500']}
+                locations={[0, 0.15, 0.4, 0.7, 1]}
+                style={[styles.accessButton, styles.vipButton]}
               >
-                <Text style={styles.viewAllText}>Voir tout</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+                <View style={styles.buttonContent}>
+                  <View style={styles.buttonIconContainer}>
+                    <Lock size={BASE_UNIT * 4} color="#FFFFFF" />
+                  </View>
+                  <View style={styles.buttonTextContainer}>
+                    <Text style={styles.vipButtonText}>SALLE VIP</Text>
+                    <Text style={styles.vipButtonSubtext}>Accès exclusif</Text>
+                  </View>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
 
-          {/* Liste des réunions d'aujourd'hui */}
-          <View style={styles.meetingListContainer}>
-            {isLoading ? (
-              <View style={styles.loadingContainer}>
-                <Text style={styles.loadingText}>Chargement...</Text>
-              </View>
-            ) : error ? (
-              <View style={styles.errorContainer}>
-                <Text style={styles.errorText}>Erreur: {error.message}</Text>
-              </View>
-            ) : (
-              <MeetingLinkList
-                meetingLinks={todayMeetings}
-                showFilters={false}
-                defaultToToday={true}
-                emptyStateTitle="Aucune réunion aujourd'hui"
-                emptyStateMessage="Vous n'avez aucune réunion prévue pour aujourd'hui. Profitez de cette journée libre!"
-                emptyStateIcon={<Calendar size={48} color="#CBD5E0" />}
-                onEditMeeting={handleEditMeeting}
-                enableEditing={true}
-              />
-            )}
+            {/* Bouton Salle Publique - Effet Verre */}
+            <TouchableOpacity 
+              onPress={handlePublicAccess}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={[
+                  'rgba(255, 255, 255, 0.3)',
+                  'rgba(42, 153, 153, 0.35)',
+                  'rgba(42, 153, 153, 0.45)',
+                  'rgba(32, 123, 123, 0.5)'
+                ]}
+                locations={[0, 0.2, 0.5, 0.8]}
+                style={[styles.accessButton, styles.publicButton]}
+              >
+                <View style={styles.buttonContent}>
+                  <View style={styles.buttonIconContainer}>
+                    <Users size={BASE_UNIT * 4} color="#FFFFFF" />
+                  </View>
+                  <View style={styles.buttonTextContainer}>
+                    <Text style={styles.publicButtonText}>SALLE PUBLIQUE</Text>
+                    <Text style={styles.publicButtonSubtext}>Accès libre</Text>
+                  </View>
+                </View>
+              </LinearGradient>
+            </TouchableOpacity>
           </View>
+        </View>
+
+        {/* AUDIO SECTION - Lecteur de méditation */}
+        <View style={[styles.audioSection, { minHeight: height * layout.audio }]}>
+          <AudioPlayer
+            audioUrl="https://1min4peace.org/wp-content/uploads/2015/02/1min4peace_FRE.mp3?_=1"
+            title="Méditation pour la paix"
+          />
         </View>
       </ScrollView>
       
@@ -172,7 +224,7 @@ export default function HomeScreen() {
 }
 
 /**
- * STYLESHEET - Responsive parfait pour smartphones
+ * STYLESHEET CORRIGÉ - Responsive parfait pour smartphones
  */
 const styles = StyleSheet.create({
   container: {
@@ -200,22 +252,136 @@ const styles = StyleSheet.create({
     paddingBottom: BASE_UNIT * 4,
   },
 
-  // HEADER SECTION
+  // HEADER SECTION - Tailles adaptatives optimisées
   headerSection: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: BASE_UNIT * 2,
-    marginBottom: BASE_UNIT * 3,
   },
 
   logoContainer: {
     marginBottom: BASE_UNIT * 3,
   },
 
+  logoWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  sunContainer: {
+    width: BASE_UNIT * 16,
+    height: BASE_UNIT * 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+
+  // Image de remplacement temporaire
   logoImage: {
     width: BASE_UNIT * 18,
     height: BASE_UNIT * 18,
     resizeMode: 'contain',
+  },
+
+  // Styles du logo 3D original (conservés pour restauration future)
+  sun: {
+    width: BASE_UNIT * 12,
+    height: BASE_UNIT * 12,
+    borderRadius: BASE_UNIT * 6,
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#FF9933',
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.4,
+    shadowRadius: 20,
+    elevation: 15,
+  },
+
+  sunHighlight: {
+    width: BASE_UNIT * 4,
+    height: BASE_UNIT * 4,
+    borderRadius: BASE_UNIT * 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    position: 'absolute',
+    top: BASE_UNIT * 2,
+    left: BASE_UNIT * 3,
+  },
+
+  greenIndicator: {
+    width: BASE_UNIT * 3,
+    height: BASE_UNIT * 3,
+    borderRadius: BASE_UNIT * 1.5,
+    position: 'absolute',
+    top: BASE_UNIT * 2,
+    right: BASE_UNIT * 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#32CD32',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+
+  greenIndicatorHighlight: {
+    width: BASE_UNIT,
+    height: BASE_UNIT,
+    borderRadius: BASE_UNIT * 0.5,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+  },
+
+  sunRays: {
+    position: 'absolute',
+    width: BASE_UNIT * 20,
+    height: BASE_UNIT * 20,
+    borderRadius: BASE_UNIT * 10,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 153, 51, 0.3)',
+    borderStyle: 'dashed',
+  },
+
+  cloud: {
+    position: 'absolute',
+    top: -BASE_UNIT * 2,
+    left: -BASE_UNIT * 3,
+    width: BASE_UNIT * 6,
+    height: BASE_UNIT * 3,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: BASE_UNIT * 1.5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+
+  leaf: {
+    position: 'absolute',
+    bottom: -BASE_UNIT,
+    right: -BASE_UNIT * 2,
+    width: BASE_UNIT * 2,
+    height: BASE_UNIT * 3,
+    backgroundColor: '#90EE90',
+    borderRadius: BASE_UNIT,
+    transform: [{ rotate: '45deg' }],
+    shadowColor: '#32CD32',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
 
   titleContainer: {
@@ -248,78 +414,96 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
 
-  // MEETINGS SECTION
-  meetingsSection: {
-    flex: 1,
+  // ACTION SECTION - Boutons adaptatifs optimisés
+  actionSection: {
+    justifyContent: 'center',
+    paddingVertical: BASE_UNIT,
   },
 
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: BASE_UNIT * 3,
-    paddingHorizontal: BASE_UNIT * 2,
+  buttonContainer: {
+    gap: BASE_UNIT * 3,
   },
 
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  accessButton: {
+    borderRadius: BASE_UNIT * 2.5,
+    paddingVertical: BASE_UNIT * 3,
+    paddingHorizontal: BASE_UNIT * 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 16,
+    elevation: 10,
+    position: 'relative',
+    overflow: 'hidden',
   },
 
-  sectionTitle: {
-    fontSize: BASE_UNIT * 3,
-    fontWeight: '600',
-    color: '#2D3748',
-    marginLeft: BASE_UNIT * 2,
+  vipButton: {
+    // Le dégradé est maintenant géré par LinearGradient
+    shadowColor: 'rgba(42, 153, 153, 0.25)',
   },
 
-  viewAllButton: {
-    paddingHorizontal: BASE_UNIT * 3,
-    paddingVertical: BASE_UNIT * 1.5,
-    borderRadius: BASE_UNIT * 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  publicButton: {
+    // Le dégradé est maintenant géré par LinearGradient
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.4)',
+    shadowColor: 'rgba(42, 153, 153, 0.2)',
   },
 
-  viewAllText: {
-    fontSize: BASE_UNIT * 2,
-    fontWeight: '500',
-    color: '#4299E1',
-  },
-
-  meetingListContainer: {
-    flex: 1,
-    minHeight: height * 0.5,
-  },
-
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  buttonContent: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: BASE_UNIT * 8,
-  },
-
-  loadingText: {
-    color: '#4A5568',
-    fontSize: BASE_UNIT * 2.5,
-  },
-
-  errorContainer: {
-    flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: BASE_UNIT * 8,
-    paddingHorizontal: BASE_UNIT * 4,
   },
 
-  errorText: {
-    color: '#E53E3E',
-    fontSize: BASE_UNIT * 2.5,
-    textAlign: 'center',
+  buttonIconContainer: {
+    marginRight: BASE_UNIT * 2.5,
+    padding: BASE_UNIT * 1.5,
+    borderRadius: BASE_UNIT * 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
 
-  // BOUTON DE RÉGLAGES FLOTTANT
+  buttonTextContainer: {
+    alignItems: 'flex-start',
+  },
+
+  vipButtonText: {
+    fontSize: BASE_UNIT * 3,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 1,
+  },
+
+  vipButtonSubtext: {
+    fontSize: BASE_UNIT * 1.8,
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontWeight: '400',
+    marginTop: 2,
+  },
+
+  publicButtonText: {
+    fontSize: BASE_UNIT * 3,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: 1,
+  },
+
+  publicButtonSubtext: {
+    fontSize: BASE_UNIT * 1.8,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '400',
+    marginTop: 2,
+  },
+
+  // AUDIO SECTION - Lecteur de méditation
+  audioSection: {
+    justifyContent: 'flex-start',
+    paddingTop: BASE_UNIT,
+  },
+
+  // BOUTON DE RÉGLAGES FLOTTANT - Design harmonieux
   floatingButton: {
     position: 'absolute',
     bottom: BASE_UNIT * 4,

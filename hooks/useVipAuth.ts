@@ -1,17 +1,17 @@
 /**
- * Hook personnalisé pour l'authentification des liens privés
+ * Hook personnalisé pour l'authentification VIP
  * Gère l'état d'authentification et les opérations associées
  */
 
 import { useState, useCallback } from 'react';
-import type { UsePrivateLinkAuthReturn } from '@/types';
+import type { UseVipAuthReturn } from '@/types';
 
-const PRIVATE_LINK_PASSWORD = '661';
+const VIP_PASSWORD = '661';
 
 /**
- * Hook pour gérer l'authentification des liens privés
+ * Hook pour gérer l'authentification VIP
  */
-export const usePrivateLinkAuth = (): UsePrivateLinkAuthReturn => {
+export const useVipAuth = (): UseVipAuthReturn => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   /**
@@ -21,7 +21,7 @@ export const usePrivateLinkAuth = (): UsePrivateLinkAuthReturn => {
     // Simulation d'une vérification asynchrone
     return new Promise((resolve) => {
       setTimeout(() => {
-        const isValid = password === PRIVATE_LINK_PASSWORD;
+        const isValid = password === VIP_PASSWORD;
         setIsAuthenticated(isValid);
         resolve(isValid);
       }, 500);
