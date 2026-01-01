@@ -14,6 +14,7 @@ import { useRouter } from 'expo-router';
 import { Globe, Bell, Info, ExternalLink } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Header } from '@/components/ui/Header';
+import { MigrationButton } from '@/components/admin/MigrationButton';
 import { useResponsive } from '@/hooks/useResponsive';
 
 // Configuration des langues disponibles
@@ -172,7 +173,15 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Section 3: À propos */}
+        {/* Section 3: Migration des données (Admin) */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { fontSize: fontSizes.lg, marginBottom: 12 }]}>
+            Administration
+          </Text>
+          <MigrationButton />
+        </View>
+
+        {/* Section 4: À propos */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Info size={24} color="#2D3748" />
@@ -205,7 +214,7 @@ export default function SettingsScreen() {
                 Mission
               </Text>
               <Text style={[styles.aboutDescription, { fontSize: fontSizes.sm }]}>
-                One Minute For Peace : une minute pour la paix intérieure et collective
+                MinderLink : simplifier la gestion et l'accès à vos liens de réunion
               </Text>
             </View>
             

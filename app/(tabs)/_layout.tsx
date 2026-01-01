@@ -18,9 +18,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="vip"
+        name="private"
         options={{
-          title: 'VIP',
+          title: 'Privé',
           tabBarIcon: ({ size, color }) => (
             <Lock size={size} color={color} />
           ),

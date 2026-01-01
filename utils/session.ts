@@ -1,120 +1,127 @@
 /**
- * Utilitaires pour la gestion des sessions
- * Fonctions pures pour le traitement des données de session
+ * Utilitaires pour les sessions de méditation
+ * Fonctions de formatage et helpers pour les sessions
  */
 
-import type { Session, PublicSession, VipSession, DayFilter, LanguageFilter } from '@/types';
-
-/**
- * Filtre les sessions selon les critères sélectionnés
- */
-export const filterSessions = (
-  sessions: Session[],
-  selectedDay: string | null,
-  selectedLanguage: string | null
-): Session[] => {
-  return sessions.filter(session => {
-    const matchesDay = selectedDay ? 
-      (Array.isArray(session.day) ? session.day.includes(selectedDay) : session.day === selectedDay) : true;
-    const matchesLanguage = selectedLanguage ? 
-      (Array.isArray(session.language) ? session.language.includes(selectedLanguage) : session.language === selectedLanguage) : true;
-    
-    return matchesDay && matchesLanguage;
-  });
-};
+import type { Session, PublicSession, VipSession } from '@/types';
 
 /**
- * Formate une date pour l'affichage
+ * Vérifie si une session est VIP
  */
-export const formatSessionDate = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('fr-FR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
-};
-
-/**
- * Vérifie si une session est de type VIP
- */
-export const isVipSession = (session: Session): session is VipSession => {
+export function isVipSession(session: Session): session is VipSession {
   return session.type === 'vip';
-};
+}
 
 /**
- * Vérifie si une session est de type public
+ * Vérifie si une session est publique
  */
-export const isPublicSession = (session: Session): session is PublicSession => {
+export function isPublicSession(session: Session): session is PublicSession {
   return session.type === 'public';
-};
+}
 
 /**
- * Extrait les informations de connexion Zoom d'une session
+ * Formate la date d'une session
  */
-export const getZoomConnectionInfo = (session: Session) => {
-  const baseInfo = {
-    zoomId: session.zoomId,
-  };
-
-  if (isPublicSession(session)) {
-    return {
-      ...baseInfo,
-      zoomLink: session.zoomLink,
-      phoneNumbers: session.phoneNumbers,
+export function formatSessionDate(dateString: string): string {
+  try {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     };
+    return date.toLocaleDateString('fr-FR', options);
+  } catch (error) {
+    return dateString;
+  }
+}
+
+/**
+ * Obtient le nom du jour en français
+ */
+export function getDayName(dateString: string): string {
+  try {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long' };
+    return date.toLocaleDateString('fr-FR', options);
+  } catch (error) {
+    return '';
+  }
+}
+
+/**
+ * Formate le fuseau horaire
+ */
+export function formatTimeZone(timeZone?: string): string {
+  if (!timeZone) return '';
+  return ` (${timeZone})`;
+}
+
+/**
+ * Obtient la couleur pour le type de session
+ */
+export function getSessionColor(session: Session): string {
+  return isVipSession(session) ? '#F4A460' : '#48BB78';
+}
+
+/**
+ * Obtient le libellé du type de session
+ */
+export function getSessionTypeLabel(session: Session): string {
+  return isVipSession(session) ? 'VIP' : 'PUBLIC';
+}
+
+/**
+ * Formate les jours de la semaine (pour sessions récurrentes)
+ */
+export function formatDays(day: string | string[]): string {
+  if (Array.isArray(day)) {
+    return day.join(', ');
+  }
+  return day;
+}
+
+/**
+ * Vérifie si une session est en cours
+ */
+export function isSessionActive(session: Session): boolean {
+  const now = new Date();
+  const sessionStart = new Date(`${session.date} ${session.time}`);
+  const sessionEnd = new Date(sessionStart.getTime() + session.duration * 60000);
+
+  return now >= sessionStart && now <= sessionEnd;
+}
+
+/**
+ * Calcule le temps restant avant une session
+ */
+export function getTimeUntilSession(session: Session): number {
+  const now = new Date();
+  const sessionStart = new Date(`${session.date} ${session.time}`);
+
+  return sessionStart.getTime() - now.getTime();
+}
+
+/**
+ * Formate le temps restant en texte lisible
+ */
+export function formatTimeUntilSession(milliseconds: number): string {
+  if (milliseconds <= 0) {
+    return 'En cours';
   }
 
-  if (isVipSession(session)) {
-    return {
-      ...baseInfo,
-      password: session.password,
-    };
+  const minutes = Math.floor(milliseconds / (1000 * 60));
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) {
+    return `Dans ${days} jour${days > 1 ? 's' : ''}`;
   }
 
-  return baseInfo;
-};
+  if (hours > 0) {
+    return `Dans ${hours}h ${minutes % 60}min`;
+  }
 
-/**
- * Génère un ID unique pour une session
- */
-export const generateSessionId = (): string => {
-  return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-};
-
-/**
- * Valide les données d'une session
- */
-export const validateSession = (session: Partial<Session>): boolean => {
-  const requiredFields = ['id', 'region', 'date', 'time', 'duration', 'zoomId', 'language', 'type', 'day', 'instructor', 'maxParticipants'];
-  
-  return requiredFields.every(field => {
-    const value = session[field as keyof Session];
-    return value !== undefined && value !== null && value !== '';
-  });
-};
-
-/**
- * Trie les sessions par date et heure
- */
-export const sortSessionsByDateTime = (sessions: Session[]): Session[] => {
-  return [...sessions].sort((a, b) => {
-    const dateA = new Date(`${a.date} ${a.time}`);
-    const dateB = new Date(`${b.date} ${b.time}`);
-    return dateA.getTime() - dateB.getTime();
-  });
-};
-
-/**
- * Groupe les sessions par jour
- */
-export const groupSessionsByDay = (sessions: Session[]): Record<string, Session[]> => {
-  return sessions.reduce((groups, session) => {
-    const day = session.day;
-    if (!groups[day]) {
-      groups[day] = [];
-    }
-    groups[day].push(session);
-    return groups;
-  }, {} as Record<string, Session[]>);
-};
+  return `Dans ${minutes} minute${minutes > 1 ? 's' : ''}`;
+}

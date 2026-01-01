@@ -130,7 +130,7 @@ export default function LanguageSelectScreen() {
           </View>
           
           <View style={styles.titleContainer}>
-            <Text style={styles.mainTitle}>1Min4Peace</Text>
+            <Text style={styles.mainTitle}>MinderLink</Text>
             <Text style={styles.subtitle}>Choisissez votre langue</Text>
             <View style={styles.titleUnderline} />
           </View>
